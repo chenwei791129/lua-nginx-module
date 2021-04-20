@@ -2,6 +2,10 @@
 Don't edit this file manually! Instead you should generate it by using:
     wiki2markdown.pl doc/HttpLuaModule.wiki
 -->
+Fork Purpose
+====
+Fork and edit some file to support ssl_certificate_by_lua with Intel® QuickAssist Technology
+
 
 Name
 ====
