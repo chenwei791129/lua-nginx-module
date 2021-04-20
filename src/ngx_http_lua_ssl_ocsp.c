@@ -272,6 +272,9 @@ ngx_http_lua_ffi_ssl_validate_ocsp_response(const u_char *resp,
 
 #else
 
+#   if OPENSSL_VERSION_NUMBER >= 0x10100000L
+        ASYNC_block_pause();
+#   endif
     int                    n;
     BIO                   *bio = NULL;
     X509                  *cert = NULL, *issuer = NULL;
@@ -390,7 +393,9 @@ ngx_http_lua_ffi_ssl_validate_ocsp_response(const u_char *resp,
     OCSP_CERTID_free(id);
     OCSP_BASICRESP_free(basic);
     OCSP_RESPONSE_free(ocsp);
-
+#   if OPENSSL_VERSION_NUMBER >= 0x10100000L
+        ASYNC_unblock_pause();
+#   endif
     return NGX_OK;
 
 error:

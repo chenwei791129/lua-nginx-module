@@ -608,7 +608,9 @@ ngx_http_lua_ffi_ssl_set_der_certificate(ngx_http_request_t *r,
     return NGX_ERROR;
 
 #   else
-
+#   if OPENSSL_VERSION_NUMBER >= 0x10100000L
+        ASYNC_block_pause();
+#   endif
     BIO               *bio = NULL;
     X509              *x509 = NULL;
     ngx_ssl_conn_t    *ssl_conn;
@@ -670,6 +672,9 @@ ngx_http_lua_ffi_ssl_set_der_certificate(ngx_http_request_t *r,
     BIO_free(bio);
 
     *err = NULL;
+#   if OPENSSL_VERSION_NUMBER >= 0x10100000L
+        ASYNC_unblock_pause();
+#   endif
     return NGX_OK;
 
 failed:
@@ -695,6 +700,9 @@ int
 ngx_http_lua_ffi_ssl_set_der_private_key(ngx_http_request_t *r,
     const char *data, size_t len, char **err)
 {
+#   if OPENSSL_VERSION_NUMBER >= 0x10100000L
+        ASYNC_block_pause();
+#   endif
     BIO               *bio = NULL;
     EVP_PKEY          *pkey = NULL;
     ngx_ssl_conn_t    *ssl_conn;
@@ -729,7 +737,9 @@ ngx_http_lua_ffi_ssl_set_der_private_key(ngx_http_request_t *r,
 
     EVP_PKEY_free(pkey);
     BIO_free(bio);
-
+#   if OPENSSL_VERSION_NUMBER >= 0x10100000L
+        ASYNC_unblock_pause();
+#   endif
     return NGX_OK;
 
 failed:
