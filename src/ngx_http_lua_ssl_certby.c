@@ -570,6 +570,7 @@ ngx_http_lua_ffi_ssl_clear_certs(ngx_http_request_t *r, char **err)
 
 #   else
 
+    ASYNC_block_pause();
     ngx_ssl_conn_t    *ssl_conn;
 
     if (r->connection == NULL || r->connection->ssl == NULL) {
@@ -584,6 +585,8 @@ ngx_http_lua_ffi_ssl_clear_certs(ngx_http_request_t *r, char **err)
     }
 
     SSL_certs_clear(ssl_conn);
+    ASYNC_unblock_pause();
+
     return NGX_OK;
 
 #   endif  /* OPENSSL_VERSION_NUMBER < 0x1000205fL */
@@ -608,9 +611,7 @@ ngx_http_lua_ffi_ssl_set_der_certificate(ngx_http_request_t *r,
     return NGX_ERROR;
 
 #   else
-#   if OPENSSL_VERSION_NUMBER >= 0x10100000L
-        ASYNC_block_pause();
-#   endif
+    ASYNC_block_pause();
     BIO               *bio = NULL;
     X509              *x509 = NULL;
     ngx_ssl_conn_t    *ssl_conn;
@@ -672,9 +673,7 @@ ngx_http_lua_ffi_ssl_set_der_certificate(ngx_http_request_t *r,
     BIO_free(bio);
 
     *err = NULL;
-#   if OPENSSL_VERSION_NUMBER >= 0x10100000L
-        ASYNC_unblock_pause();
-#   endif
+    ASYNC_unblock_pause();
     return NGX_OK;
 
 failed:
@@ -700,9 +699,7 @@ int
 ngx_http_lua_ffi_ssl_set_der_private_key(ngx_http_request_t *r,
     const char *data, size_t len, char **err)
 {
-#   if OPENSSL_VERSION_NUMBER >= 0x10100000L
-        ASYNC_block_pause();
-#   endif
+    ASYNC_block_pause();
     BIO               *bio = NULL;
     EVP_PKEY          *pkey = NULL;
     ngx_ssl_conn_t    *ssl_conn;
@@ -737,9 +734,7 @@ ngx_http_lua_ffi_ssl_set_der_private_key(ngx_http_request_t *r,
 
     EVP_PKEY_free(pkey);
     BIO_free(bio);
-#   if OPENSSL_VERSION_NUMBER >= 0x10100000L
-        ASYNC_unblock_pause();
-#   endif
+    ASYNC_unblock_pause();
     return NGX_OK;
 
 failed:
@@ -975,6 +970,7 @@ int
 ngx_http_lua_ffi_cert_pem_to_der(const u_char *pem, size_t pem_len, u_char *der,
     char **err)
 {
+    ASYNC_block_pause();
     int       total, len;
     BIO      *bio;
     X509     *x509;
@@ -1045,6 +1041,7 @@ ngx_http_lua_ffi_cert_pem_to_der(const u_char *pem, size_t pem_len, u_char *der,
     }
 
     BIO_free(bio);
+    ASYNC_unblock_pause();
 
     return total;
 }
@@ -1054,6 +1051,7 @@ int
 ngx_http_lua_ffi_priv_key_pem_to_der(const u_char *pem, size_t pem_len,
     u_char *der, char **err)
 {
+    ASYNC_block_pause();
     int          len;
     BIO         *in;
     EVP_PKEY    *pkey;
@@ -1084,6 +1082,7 @@ ngx_http_lua_ffi_priv_key_pem_to_der(const u_char *pem, size_t pem_len,
     }
 
     EVP_PKEY_free(pkey);
+    ASYNC_unblock_pause();
 
     return len;
 }
@@ -1241,6 +1240,7 @@ ngx_http_lua_ffi_set_cert(ngx_http_request_t *r,
 #else
     int                i;
 #endif
+    ASYNC_block_pause();
     X509              *x509 = NULL;
     ngx_ssl_conn_t    *ssl_conn;
     STACK_OF(X509)    *chain = cdata;
@@ -1291,6 +1291,7 @@ ngx_http_lua_ffi_set_cert(ngx_http_request_t *r,
     }
 
     *err = NULL;
+    ASYNC_unblock_pause();
     return NGX_OK;
 
 failed:
@@ -1308,6 +1309,7 @@ int
 ngx_http_lua_ffi_set_priv_key(ngx_http_request_t *r,
     void *cdata, char **err)
 {
+    ASYNC_block_pause();
     EVP_PKEY          *pkey = NULL;
     ngx_ssl_conn_t    *ssl_conn;
 
@@ -1332,7 +1334,7 @@ ngx_http_lua_ffi_set_priv_key(ngx_http_request_t *r,
         *err = "SSL_use_PrivateKey() failed";
         goto failed;
     }
-
+    ASYNC_unblock_pause();
     return NGX_OK;
 
 failed:
